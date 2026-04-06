@@ -6,43 +6,6 @@ vim9script
 var registry: dict<dict<any>> = {}
 var job_id_counter: number = 0
 
-# WARN: deprecated
-export def AICall(backend: string, model: string, prompt: string): list<string>
-    var system_prompt = get(g:, 'explain_prompt', '')
-    if empty(system_prompt)
-        throw 'AIExplain: system prompt is empty'
-    endif
-
-    var cmd: list<string> = []
-    if backend == 'claude'
-        cmd = [
-            'claude', '-p',
-            '--output-format', 'text',
-            '--effort', 'medium',
-            '--disallowedTools', 'Bash', 'Write', 'Edit', 'Read',
-            '--append-system-prompt', system_prompt,
-        ]
-
-        if model != ''
-            cmd->add('--model')
-            cmd->add(model)
-        endif
-    endif
-
-    if empty(cmd)
-        throw 'Unsupported backend: ' .. backend
-    endif
-
-    const cmd_str = join(map(copy(cmd), 'shellescape(v:val)'), ' ')
-    const result = system(cmd_str, prompt)
-
-    if v:shell_error != 0
-        throw 'Command failed (' .. v:shell_error .. '): ' .. result
-    endif
-
-    return split(trim(result), "\n")
-enddef
-
 export def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
     var cmd: list<string> = []
     if backend == 'claude'
