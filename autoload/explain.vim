@@ -7,13 +7,10 @@ def InitSetup(line1: number, line2: number): dict<any>
         throw 'AIExplain: Selection is empty'
     endif
 
-    var prompt = get(g:, 'explain_prompt', '')
-    if empty(prompt)
-        throw 'AIExplain: Prompt is empty'
+    var system_prompt = get(g:, 'explain_prompt', '')
+    if empty(system_prompt)
+        throw 'AIExplain: system prompt is empty'
     endif
-
-    prompt ..= "\n\nCode:\n" .. text
-    prompt ..= "\nIf you receive no text, output exactly: ERROR:NO_TEXT"
 
     const backend = get(g:, 'explain_backend', 'claude')
     if !executable(backend)
@@ -21,6 +18,9 @@ def InitSetup(line1: number, line2: number): dict<any>
     endif
 
     const model = get(g:, 'explain_model', '')
+
+    var filename = expand('%:t')
+    var prompt = 'Filename: ' .. filename .. "\nCode:\n" .. text
 
     return {
         prompt: prompt,

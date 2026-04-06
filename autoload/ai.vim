@@ -1,9 +1,18 @@
 vim9script
 
+# TODO: analize the --bare option for claude and add configuration to enable or disable it.
+# Requires ANTHROPIC_API_KEY
+
 export def AICall(backend: string, model: string, prompt: string): list<string>
     var cmd: list<string> = []
     if backend == 'claude'
-        cmd = ['claude', '-p', '-', '--output-format', 'text']
+        cmd = [
+            'claude', '-p',
+            '--output-format', 'text',
+            '--effort', 'medium',
+            '--disallowedTools', 'Bash', 'Write', 'Edit', 'Read',
+            '--append-system-prompt', get(g:, 'explain_prompt')
+        ]
 
         if model != ''
             cmd->add('--model')
