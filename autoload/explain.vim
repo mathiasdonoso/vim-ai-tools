@@ -19,7 +19,7 @@ export def ExplainCode(line1: number, line2: number): void
     endif
 
     try
-        ui#SpinnerStart('Thinking...')
+        ui#SpinnerStart('Thinking')
 
         var system_prompt = get(g:, 'explain_prompt', '')
         if empty(system_prompt)
@@ -35,14 +35,14 @@ export def ExplainCode(line1: number, line2: number): void
         const prompt = BuildPrompt(line1, line2)
 
         current_jid = ai#AICallAsync(backend, model, prompt, (lines) => {
+            ui#SpinnerStop()
             ui#DisplayResult(lines)
         })
     catch
+        ui#SpinnerStop()
         echohl ErrorMsg
         echom '[ExplainCode] ' .. v:exception
         echohl None
-    finally
-        ui#SpinnerStop()
     endtry
 enddef
 
