@@ -16,10 +16,6 @@ def InitSetup(line1: number, line2: number): dict<any>
     prompt ..= "\nIf you receive no text, output exactly: ERROR:NO_TEXT"
 
     const backend = get(g:, 'explain_backend', 'claude')
-    if backend != 'claude'
-        throw 'AIExplain: unknown backend "' .. backend .. '"'
-    endif
-
     if !executable(backend)
         throw 'AIExplain: backend executable "' .. backend .. '" not found in PATH'
     endif
