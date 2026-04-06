@@ -6,7 +6,7 @@ def BuildPrompt(line1: number, line2: number): string
     const lines = getline(line1, line2)
     const text = join(lines, "\n")
     if trim(text) == ''
-        throw 'AIExplain: Selection is empty'
+        throw '[AIExplain] Selection is empty'
     endif
 
     const filename = expand('%:t')
@@ -23,12 +23,12 @@ export def ExplainCode(line1: number, line2: number): void
 
         var system_prompt = get(g:, 'explain_prompt', '')
         if empty(system_prompt)
-            throw 'AIExplain: system prompt is empty'
+            throw '[AIExplain] system prompt is empty'
         endif
 
         const backend = get(g:, 'explain_backend', 'claude')
         if !executable(backend)
-            throw 'AIExplain: backend executable "' .. backend .. '" not found in PATH'
+            throw '[AIExplain] backend executable "' .. backend .. '" not found in PATH'
         endif
 
         const model = get(g:, 'explain_model', '')
@@ -41,7 +41,7 @@ export def ExplainCode(line1: number, line2: number): void
     catch
         ui#SpinnerStop()
         echohl ErrorMsg
-        echom '[ExplainCode] ' .. v:exception
+        echom '[AIExplain] ' .. v:exception
         echohl None
     endtry
 enddef
@@ -74,7 +74,7 @@ export def AICallAsync(backend: string, model: string, prompt: string, Callback:
     endif
 
     if empty(cmd)
-        throw 'Unsupported backend: ' .. backend
+        throw '[AIExplain] Unsupported backend: ' .. backend
     endif
 
     return core#CallAsync(cmd, prompt, Callback)
