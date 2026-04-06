@@ -1,6 +1,6 @@
 vim9script
 
-def InitSetup(line1: number, line2: number): dict<string>
+def InitSetup(line1: number, line2: number): dict<any>
     const lines = getline(line1, line2)
     const text = join(lines, "\n")
     if trim(text) == ''
@@ -12,7 +12,7 @@ def InitSetup(line1: number, line2: number): dict<string>
         throw 'AIExplain: Prompt is empty'
     endif
 
-    prompt ..= "\nCode: " .. text
+    prompt ..= "\n\nCode:\n" .. text
     prompt ..= "\nIf you receive no text, output exactly: ERROR:NO_TEXT"
 
     const backend = get(g:, 'explain_backend', 'claude')
@@ -33,24 +33,19 @@ def InitSetup(line1: number, line2: number): dict<string>
     }
 enddef
 
-export def ExplainCode(line1: number, line2: number)
+export def ExplainCode(line1: number, line2: number): void
     try
-        const config = InitSetup(line1, line2)
-        var cmd: list<string> = ['claude', '-p', config.prompt, '--output-format', 'text']
-        if config.model != ''
-            cmd->add('--model')
-            cmd->add(config.model)
-        endif
+        ui#SpinnerStart('Thinking...')
 
-        const cmd_str = join(map(copy(cmd), 'shellescape(v:val)'), ' ')
-        const result = system(cmd_str)
-        const lines = split(result, "\n")
+        const config = InitSetup(line1, line2)
+        const lines = ai#AICall(config.backend, config.model, config.prompt)
 
         ui#DisplayResult(lines)
     catch
         echohl ErrorMsg
-        echom v:exception
+        echom '[ExplainCode] ' .. v:exception
         echohl None
-        return
+    finally
+        ui#SpinnerStop()
     endtry
 enddef

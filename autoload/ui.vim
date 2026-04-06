@@ -16,3 +16,11 @@ export def DisplayResult(lines: list<string>)
     setlocal linebreak
     resize 15
 enddef
+
+export def SpinnerStart(message: string)
+    # TODO
+enddef
+
+export def SpinnerStop()
+    # TODO
+enddef
