@@ -14,7 +14,7 @@ def BuildPrompt(line1: number, line2: number): string
 enddef
 
 export def ExplainCode(line1: number, line2: number): void
-    if ai#IsRunning(current_jid)
+    if core#IsRunning(current_jid)
         return
     endif
 
@@ -34,7 +34,7 @@ export def ExplainCode(line1: number, line2: number): void
         const model = get(g:, 'explain_model', '')
         const prompt = BuildPrompt(line1, line2)
 
-        current_jid = ai#AICallAsync(backend, model, prompt, (lines) => {
+        current_jid = AICallAsync(backend, model, prompt, (lines) => {
             ui#SpinnerStop()
             ui#DisplayResult(lines)
         })
@@ -47,9 +47,35 @@ export def ExplainCode(line1: number, line2: number): void
 enddef
 
 export def ExplainCodeCancel(): void
-    if ai#IsRunning(current_jid)
-        ai#Cancel(current_jid)
+    if core#IsRunning(current_jid)
+        core#Cancel(current_jid)
     endif
 
     echo 'AI: cancelled pending request'
+enddef
+
+# TODO: analize the --bare option for claude and add configuration to enable or disable it.
+# Requires ANTHROPIC_API_KEY
+export def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
+    var cmd: list<string> = []
+    if backend == 'claude'
+        cmd = [
+            'claude', '-p',
+            '--output-format', 'text',
+            '--effort', 'medium',
+            '--disallowedTools', 'Bash', 'Write', 'Edit', 'Read',
+            '--append-system-prompt', get(g:, 'explain_prompt'),
+        ]
+
+        if model != ''
+            cmd->add('--model')
+            cmd->add(model)
+        endif
+    endif
+
+    if empty(cmd)
+        throw 'Unsupported backend: ' .. backend
+    endif
+
+    return core#CallAsync(cmd, prompt, Callback)
 enddef

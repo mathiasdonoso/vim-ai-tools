@@ -1,34 +1,7 @@
 vim9script
 
-# TODO: analize the --bare option for claude and add configuration to enable or disable it.
-# Requires ANTHROPIC_API_KEY
-
 var registry: dict<dict<any>> = {}
 var job_id_counter: number = 0
-
-export def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
-    var cmd: list<string> = []
-    if backend == 'claude'
-        cmd = [
-            'claude', '-p',
-            '--output-format', 'text',
-            '--effort', 'medium',
-            '--disallowedTools', 'Bash', 'Write', 'Edit', 'Read',
-            '--append-system-prompt', get(g:, 'explain_prompt'),
-        ]
-
-        if model != ''
-            cmd->add('--model')
-            cmd->add(model)
-        endif
-    endif
-
-    if empty(cmd)
-        throw 'Unsupported backend: ' .. backend
-    endif
-
-    return CallAsync(cmd, prompt, Callback)
-enddef
 
 export def CallAsync(cmd: list<string>, stdin_data: string, Callback: func(list<string>)): number
     job_id_counter += 1
