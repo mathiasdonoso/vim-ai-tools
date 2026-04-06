@@ -6,7 +6,7 @@ These are not designed for a complete AI-integrated editing experience — just 
 
 ## Tools
 
-- **explain** — explains selected code using an LLM and displays the result in a new buffer
+- **AIExplain** — explains selected code using an LLM and displays the result in a new buffer
 
 ## Status
 
