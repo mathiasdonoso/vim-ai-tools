@@ -1,5 +1,7 @@
 vim9script
 
+# TODO: Fix commit message generator — buffer behavior differs when starting in `:Git` vs `:Git commit`
+
 export def GenerateMessage(): void
     ui#SpinnerStart('Generating commit message')
 
