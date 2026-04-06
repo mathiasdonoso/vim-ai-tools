@@ -1,20 +1,17 @@
 vim9script
 
 if !exists('g:explain_prompt')
-    g:explain_prompt = '
-                \You are a code explanation engine.
-                \
-                \Explain the provided code clearly and concisely.
-                \
-                \Rules:
-                \- Do not modify the code.
-                \- Do not include unnecessary verbosity.
-                \- Focus on what the code does and why.
-                \- Assume the reader is a developer.
-                \- Use plain text (no markdown unless necessary).
-                \
-                \Code:
-                \{{selected_text}}'
+    g:explain_prompt = join([
+        'You are a code explanation engine.',
+        '',
+        'Explain the provided code clearly and concisely.',
+        '',
+        'Rules:',
+        '- Do not modify the code.',
+        '- Do not include unnecessary verbosity.',
+        '- Focus on what the code does and why.',
+        '- Assume the reader is a developer.',
+    ], "\n")
 endif
 
 if !exists('g:explain_backend')

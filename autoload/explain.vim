@@ -1,40 +1,73 @@
 vim9script
 
-export def ExplainCode(line1: number, line2: number)
+def InitSetup(line1: number, line2: number): dict<string>
     var lines = getline(line1, line2)
     var text = join(lines, "\n")
-
-    if trim(text) == ""
-        echoerr "AIExplain: Selection is empty"
-        return
+    if trim(text) == ''
+        throw 'AIExplain: Selection is empty'
     endif
 
-    var prompt = get(g:, "explain_prompt", "")
+    var prompt = get(g:, 'explain_prompt', '')
     if empty(prompt)
-        echoerr "AIExplain: Prompt is empty"
-        return
+        throw 'AIExplain: Prompt is empty'
     endif
 
-    prompt ..= "
-                \. If you receive no text, output exactly: ERROR:NO_TEXT"
+    prompt ..= "\nCode: " .. text
+    prompt ..= "\nIf you receive no text, output exactly: ERROR:NO_TEXT"
 
-    var backend = get(g:, "explain_backend", "claude")
-    if backend != "claude"
-        echoerr "AIExplain: unknown backend \"" .. backend .. "\""
-        return
+    var backend = get(g:, 'explain_backend', 'claude')
+    if backend != 'claude'
+        throw 'AIExplain: unknown backend "' .. backend .. '"'
     endif
 
     if !executable(backend)
-        echoerr "AIExplain: backend executable \"" .. backend .. "\" not found in PATH"
+        throw 'AIExplain: backend executable "' .. backend .. '" not found in PATH'
+    endif
+
+    var model = get(g:, 'explain_model', '')
+
+    return {
+        prompt: prompt,
+        backend: backend,
+        model: model,
+    }
+enddef
+
+export def ExplainCode(line1: number, line2: number)
+    try
+        var config = InitSetup(line1, line2)
+        var cmd: list<string> = ['claude', '-p', config.prompt, '--output-format', 'text']
+        if config.model != ''
+            cmd->add('--model')
+            cmd->add(config.model)
+        endif
+
+        var cmd_str = join(map(copy(cmd), 'shellescape(v:val)'), ' ')
+        var result = system(cmd_str)
+        var lines = split(result, "\n")
+
+        DisplayResult(lines)
+    catch
+        echohl ErrorMsg
+        echom v:exception
+        echohl None
         return
-    endif
+    endtry
+enddef
 
-    var model = get(g:, "explain_model", "")
-    var cmd: list<string> = ["claude", "-p", prompt, "--output-format", "text"]
-    if model != ""
-        cmd->add("--model")
-        cmd->add(model)
-    endif
+def DisplayResult(lines: list<string>)
+    aboveleft new
 
-    echo "Result -> model: " .. model .. ", backend: " .. backend .. ", prompt: " .. prompt
+    setlocal buftype=nofile
+    setlocal bufhidden=wipe
+    setlocal noswapfile
+    setlocal nobuflisted
+
+    setlocal modifiable
+    call setline(1, lines)
+    setlocal nomodifiable
+
+    setlocal wrap
+    setlocal linebreak
+    resize 15
 enddef
