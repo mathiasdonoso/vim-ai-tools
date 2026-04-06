@@ -17,7 +17,7 @@ if !exists('g:commit_message_backend')
 endif
 
 if !exists('g:commit_message_model')
-    g:commit_message_model = 'claude-haiku-4-5-20251001'
+    g:commit_message_model = 'haiku'
 endif
 
 command! AICommitMessage call commit_message#GenerateMessage()

@@ -20,7 +20,7 @@ if !exists('g:explain_backend')
 endif
 
 if !exists('g:explain_model')
-    g:explain_model = 'claude-haiku-4-5-20251001'
+    g:explain_model = 'haiku'
 endif
 
 command! -range=% AIExplain call explain#ExplainCode(<line1>, <line2>)
