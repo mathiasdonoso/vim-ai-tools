@@ -6,8 +6,9 @@ These are not designed for a complete AI-integrated working experience — just 
 
 ## Tools
 
-- **AIExplain** — explains selected code using an LLM and displays the result in a new buffer
-- **AICommitMessage** — generate commit messages following the conventional commits format
+- **AIExplain**       — explains selected code using an LLM and displays the result in a new buffer
+- **AIOperator**      - generates or transforms code from a natural language prompt using an LLM
+- **AICommitMessage** — generates commit messages following the conventional commits format
 
 ## Status
 

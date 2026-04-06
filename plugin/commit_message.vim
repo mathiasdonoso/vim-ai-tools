@@ -8,7 +8,7 @@ if !exists('g:commit_message_prompt')
         '- If needed, add a blank line followed by a brief body explaining *what* and *why*, not *how*',
         '- Be specific, avoid vague messages like "fix bug" or "update code"',
         '- Do not include any explanation, commentary, or formatting — output only the commit message',
-        '- Output only the commit message text, no markdown, no code blocks, no backticks, no formatting of any kind.'
+        '- Output only the commit message text, no markdown, no code blocks, no backticks, no formatting of any kind.',
     ], "\n")
 endif
 

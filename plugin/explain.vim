@@ -11,7 +11,7 @@ if !exists('g:explain_prompt')
         '- Do not include unnecessary verbosity.',
         '- Focus on what the code does and why.',
         '- Assume the reader is a developer.',
-        '- If you receive no text, output exactly: ERROR:NO_TEXT'
+        '- If you receive no text, output exactly: ERROR:NO_TEXT',
     ], "\n")
 endif
 

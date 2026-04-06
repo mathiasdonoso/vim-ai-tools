@@ -14,12 +14,7 @@ if !exists('g:operator_prompt')
         '- Output ONLY the final code.',
         '- If the instruction is unclear or cannot be applied, return the code unchanged.',
         '- If no changes are needed, return the code exactly as received.',
-        '',
-        'Instruction:',
-        '{{user_prompt}}',
-        '',
-        'Code:',
-        '{{selected_text}}',
+        '- Output only raw code. No markdown fences, no language tags, no explanations, no comments about the code. Start with the first line of code, end with the last.',
     ], "\n")
 endif
 
@@ -28,7 +23,9 @@ if !exists('g:operator_backend')
 endif
 
 if !exists('g:operator_model')
-    g:operator_model = 'claude-haiku-4-5-20251001'
+    g:operator_model = 'sonnet'
 endif
 
+command! -range=% -nargs=1 AIOperator call operator#Code(<line1>, <line2>, <q-args>)
+command! AIOperatorCancel call operator#CodeCancel()
 

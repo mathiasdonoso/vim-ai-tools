@@ -51,7 +51,7 @@ export def ExplainCodeCancel(): void
         core#Cancel(current_jid)
     endif
 
-    echo 'AI: cancelled pending request'
+    echo '[AIExplain]: cancelled pending request'
 enddef
 
 # TODO: analize the --bare option for claude and add configuration to enable or disable it.
