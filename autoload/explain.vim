@@ -1,5 +1,7 @@
 vim9script
 
+var current_jid: number = 0
+
 def BuildPrompt(line1: number, line2: number): string
     const lines = getline(line1, line2)
     const text = join(lines, "\n")
@@ -7,13 +9,15 @@ def BuildPrompt(line1: number, line2: number): string
         throw 'AIExplain: Selection is empty'
     endif
 
-    var filename = expand('%:t')
-    var prompt = 'Filename: ' .. filename .. "\nCode:\n" .. text
-
-    return prompt
+    const filename = expand('%:t')
+    return 'Filename: ' .. filename .. "\nCode:\n" .. text
 enddef
 
 export def ExplainCode(line1: number, line2: number): void
+    if ai#IsRunning(current_jid)
+        return
+    endif
+
     try
         ui#SpinnerStart('Thinking...')
 
@@ -28,11 +32,11 @@ export def ExplainCode(line1: number, line2: number): void
         endif
 
         const model = get(g:, 'explain_model', '')
-
         const prompt = BuildPrompt(line1, line2)
-        const lines = ai#AICall(backend, model, prompt)
 
-        ui#DisplayResult(lines)
+        current_jid = ai#AICallAsync(backend, model, prompt, (lines) => {
+            ui#DisplayResult(lines)
+        })
     catch
         echohl ErrorMsg
         echom '[ExplainCode] ' .. v:exception
@@ -40,4 +44,12 @@ export def ExplainCode(line1: number, line2: number): void
     finally
         ui#SpinnerStop()
     endtry
+enddef
+
+export def ExplainCodeCancel(): void
+    if ai#IsRunning(current_jid)
+        ai#Cancel(current_jid)
+    endif
+
+    echo 'AI: cancelled pending request'
 enddef

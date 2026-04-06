@@ -24,3 +24,4 @@ if !exists('g:explain_model')
 endif
 
 command! -range=% AIExplain call explain#ExplainCode(<line1>, <line2>)
+command! AIExplainCancel call explain#ExplainCodeCancel()
