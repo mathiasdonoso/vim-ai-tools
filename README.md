@@ -1,8 +1,8 @@
 # vim-ai-tools
 
-A personal collection of AI-powered Vim tools I'm testing against my current workflow.
+A personal collection of AI-powered Vim tools.
 
-These are not designed for a complete AI-integrated editing experience — just individual tools to experiment with. Still figuring out which approach and style actually fits day-to-day use.
+These are not designed for a complete AI-integrated working experience — just individual tools to experiment with.
 
 ## Tools
 
@@ -10,4 +10,4 @@ These are not designed for a complete AI-integrated editing experience — just 
 
 ## Status
 
-Experimental.
+Experimental. Commands may change without notice as I develop the workflow that best suits my style.
