@@ -21,3 +21,4 @@ if !exists('g:commit_message_model')
 endif
 
 command! AICommitMessage call commit_message#GenerateMessage()
+command! AICommitMessageCancel call commit_message#GenerateMessageCancel()

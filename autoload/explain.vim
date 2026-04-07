@@ -1,9 +1,8 @@
 vim9script
 
-# TODO: Do something when no text is received
-
 var current_jid: number = 0
 
+# TODO: Do something when no text is received
 def BuildPrompt(line1: number, line2: number): string
     const lines = getline(line1, line2)
     const text = join(lines, "\n")

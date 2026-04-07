@@ -1,8 +1,13 @@
 vim9script
 
-# TODO: Fix commit message generator — buffer behavior differs when starting in `:Git` vs `:Git commit`
+var current_jid: number = 0
 
+# TODO: Fix commit message generator — buffer behavior differs when starting in `:Git` vs `:Git commit`
 export def GenerateMessage(): void
+    if core#IsRunning(current_jid)
+        return
+    endif
+
     const backend = get(g:, 'commit_message_backend', 'claude')
     if !executable(backend)
         throw '[AICommitMessage] backend executable "' .. backend .. '" not found in PATH'
@@ -24,7 +29,7 @@ export def GenerateMessage(): void
 
         const model = get(g:, 'commit_message_model', '')
 
-        AICallAsync(backend, model, prompt, (lines) => {
+        current_jid = AICallAsync(backend, model, prompt, (lines) => {
             try
                 var commit_file = git_dir .. '/COMMIT_EDITMSG'
 
@@ -50,6 +55,14 @@ export def GenerateMessage(): void
         echom '[AICommitMessage] ' .. v:exception
         echohl None
     endtry
+enddef
+
+export def GenerateMessageCancel(): void
+    if core#IsRunning(current_jid)
+        core#Cancel(current_jid)
+    endif
+    ui#SpinnerStop()
+    echo '[AICommitMessage]: cancelled pending request'
 enddef
 
 export def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
