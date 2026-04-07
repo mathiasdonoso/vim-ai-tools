@@ -12,9 +12,10 @@ if !exists('g:operator_prompt')
         '- Do NOT add comments or explanations.',
         '- Do NOT wrap the output in markdown or backticks.',
         '- Output ONLY the final code.',
+        '- If no code is provided, treat the instruction as a request for new code and generate it from scratch.',
         '- If the instruction is unclear or cannot be applied, return the code unchanged.',
         '- If no changes are needed, return the code exactly as received.',
-        '- Never wrap output in fenced code blocks. Output the raw code directly. No language tags, no explanations, no comments about the code.'
+        '- Never wrap output in fenced code blocks. Output the raw code directly. No language tags, no explanations, no comments about the code.',
     ], "\n")
 endif
 

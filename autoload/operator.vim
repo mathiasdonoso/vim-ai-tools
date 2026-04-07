@@ -5,13 +5,15 @@ var current_jid: number = 0
 def BuildPrompt(line1: number, line2: number, instruction: string): string
     const lines = getline(line1, line2)
     const text = join(lines, "\n")
-    if trim(text) == ''
-        throw '[AIOperator] Selection is empty'
-    endif
-
     const filename = expand('%:t')
 
-    return $"Filename: {filename}\nInstruction: {instruction}\nCode:\n{text}"
+    var prompt = $"Filename: {filename}\nInstruction: {instruction}"
+
+    if trim(text) != ''
+        prompt ..= $"\nCode:\n{text}"
+    endif
+
+    return prompt
 enddef
 
 export def Code(line1: number, line2: number, args: string): void
