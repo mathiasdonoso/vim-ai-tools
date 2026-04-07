@@ -39,15 +39,22 @@ export def Code(line1: number, line2: number, args: string): void
         const buf = bufnr('%')
 
         current_jid = AICallAsync(backend, model, prompt, (lines) => {
-            const new_lines = StripFencedCodeBlock(lines)
-            const range = ui#SelectionGetRange()
-            if empty(range)
+            try
+                const new_lines = StripFencedCodeBlock(lines)
+                const range = ui#SelectionGetRange()
+                if empty(range)
+                    ui#SelectionStop()
+                    return
+                endif
+                deletebufline(buf, range[0], range[1])
+                appendbufline(buf, range[0] - 1, new_lines)
                 ui#SelectionStop()
-                return
-            endif
-            deletebufline(buf, range[0], range[1])
-            appendbufline(buf, range[0] - 1, new_lines)
-            ui#SelectionStop()
+            catch
+                ui#SelectionStop()
+                echohl ErrorMsg
+                echom '[AIOperator] ' .. v:exception
+                echohl None
+            endtry
         })
     catch
         ui#SelectionStop()

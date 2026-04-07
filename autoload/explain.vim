@@ -37,8 +37,15 @@ export def ExplainCode(line1: number, line2: number): void
         const prompt = BuildPrompt(line1, line2)
 
         current_jid = AICallAsync(backend, model, prompt, (lines) => {
-            ui#SelectionStop()
-            ui#DisplayResult(lines)
+            try
+                ui#SelectionStop()
+                ui#DisplayResult(lines)
+            catch
+                ui#SelectionStop()
+                echohl ErrorMsg
+                echom '[AIExplain] ' .. v:exception
+                echohl None
+            endtry
         })
     catch
         ui#SelectionStop()

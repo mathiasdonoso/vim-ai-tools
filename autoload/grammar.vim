@@ -35,14 +35,21 @@ export def ImproveGrammar(line1: number, line2: number): void
 
         const buf = bufnr('%')
         current_jid = AICallAsync(backend, model, prompt, (lines) => {
-            const range = ui#SelectionGetRange()
-            if empty(range)
+            try
+                const range = ui#SelectionGetRange()
+                if empty(range)
+                    ui#SelectionStop()
+                    return
+                endif
+                deletebufline(buf, range[0], range[1])
+                appendbufline(buf, range[0] - 1, lines)
                 ui#SelectionStop()
-                return
-            endif
-            deletebufline(buf, range[0], range[1])
-            appendbufline(buf, range[0] - 1, lines)
-            ui#SelectionStop()
+            catch
+                ui#SelectionStop()
+                echohl ErrorMsg
+                echom '[AIGrammar] ' .. v:exception
+                echohl None
+            endtry
         })
     catch
         ui#SelectionStop()

@@ -25,15 +25,22 @@ export def GenerateMessage(): void
         const model = get(g:, 'commit_message_model', '')
 
         AICallAsync(backend, model, prompt, (lines) => {
-            var commit_file = git_dir .. '/COMMIT_EDITMSG'
+            try
+                var commit_file = git_dir .. '/COMMIT_EDITMSG'
 
-            var existing = filereadable(commit_file) ? readfile(commit_file) : []
-            var new_content = lines + (len(existing) > 1 ? existing[1 : ] : [])
-            writefile(new_content, commit_file)
+                var existing = filereadable(commit_file) ? readfile(commit_file) : []
+                var new_content = lines + (len(existing) > 1 ? existing[1 : ] : [])
+                writefile(new_content, commit_file)
 
-            execute 'edit ' .. commit_file
-            setlocal textwidth=72
-            ui#SpinnerStop()
+                execute 'edit ' .. commit_file
+                setlocal textwidth=72
+                ui#SpinnerStop()
+            catch
+                ui#SpinnerStop()
+                echohl ErrorMsg
+                echom '[AICommitMessage] ' .. v:exception
+                echohl None
+            endtry
         })
     catch
         ui#SpinnerStop()
