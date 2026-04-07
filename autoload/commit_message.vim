@@ -43,6 +43,7 @@ export def AICallAsync(backend: string, model: string, prompt: string, Callback:
             'claude', '-p',
             '--output-format', 'text',
             '--effort', 'low',
+            '--disallowedTools', 'Bash, Write, Edit, Read',
             '--append-system-prompt', get(g:, 'commit_message_prompt'),
         ]
 
