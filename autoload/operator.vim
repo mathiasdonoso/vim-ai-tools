@@ -22,7 +22,7 @@ export def Code(line1: number, line2: number, args: string): void
     endif
 
     try
-        ui#SpinnerStart('Thinking')
+        ui#SelectionStart(bufnr('%'), line1, line2)
 
         var system_prompt = get(g:, 'explain_prompt', '')
         if empty(system_prompt)
@@ -38,11 +38,11 @@ export def Code(line1: number, line2: number, args: string): void
         const prompt = BuildPrompt(line1, line2, args)
 
         current_jid = AICallAsync(backend, model, prompt, (lines) => {
-            ui#SpinnerStop()
+            ui#SelectionStop()
             ui#DisplayResult(lines)
         })
     catch
-        ui#SpinnerStop()
+        ui#SelectionStop()
         echohl ErrorMsg
         echom '[AIOperator] ' .. v:exception
         echohl None
@@ -53,7 +53,7 @@ export def CodeCancel(): void
     if core#IsRunning(current_jid)
         core#Cancel(current_jid)
     endif
-
+    ui#SelectionStop()
     echo '[AIOperator]: cancelled pending request'
 enddef
 

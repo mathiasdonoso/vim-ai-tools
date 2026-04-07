@@ -21,7 +21,7 @@ export def ExplainCode(line1: number, line2: number): void
     endif
 
     try
-        ui#SpinnerStart('Thinking')
+        ui#SelectionStart(bufnr('%'), line1, line2)
 
         var system_prompt = get(g:, 'explain_prompt', '')
         if empty(system_prompt)
@@ -37,11 +37,11 @@ export def ExplainCode(line1: number, line2: number): void
         const prompt = BuildPrompt(line1, line2)
 
         current_jid = AICallAsync(backend, model, prompt, (lines) => {
-            ui#SpinnerStop()
+            ui#SelectionStop()
             ui#DisplayResult(lines)
         })
     catch
-        ui#SpinnerStop()
+        ui#SelectionStop()
         echohl ErrorMsg
         echom '[AIExplain] ' .. v:exception
         echohl None
@@ -52,7 +52,7 @@ export def ExplainCodeCancel(): void
     if core#IsRunning(current_jid)
         core#Cancel(current_jid)
     endif
-
+    ui#SelectionStop()
     echo '[AIExplain]: cancelled pending request'
 enddef
 
