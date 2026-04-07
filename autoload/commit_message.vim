@@ -3,9 +3,17 @@ vim9script
 # TODO: Fix commit message generator — buffer behavior differs when starting in `:Git` vs `:Git commit`
 
 export def GenerateMessage(): void
-    const backend = get(g:, 'explain_backend', 'claude')
+    const backend = get(g:, 'commit_message_backend', 'claude')
     if !executable(backend)
-        throw '[AIExplain] backend executable "' .. backend .. '" not found in PATH'
+        throw '[AICommitMessage] backend executable "' .. backend .. '" not found in PATH'
+    endif
+
+    var git_dir = system('git rev-parse --git-dir')->trim()
+    if v:shell_error != 0
+        echohl ErrorMsg
+        echom '[AICommitMessage] Not in a git repository'
+        echohl None
+        return
     endif
 
     try
@@ -14,14 +22,13 @@ export def GenerateMessage(): void
         var diff = system('git diff --staged --unified=3 --no-color')
         var prompt = $"Summary of changes:\n{stat}\n\nFull diff:\n{diff}"
 
-        const model = get(g:, 'explain_model', '')
+        const model = get(g:, 'commit_message_model', '')
 
         AICallAsync(backend, model, prompt, (lines) => {
-            var git_dir = system('git rev-parse --git-dir')->trim()
             var commit_file = git_dir .. '/COMMIT_EDITMSG'
 
-            var existing = readfile(commit_file)
-            var new_content = lines + existing[1 : ]
+            var existing = filereadable(commit_file) ? readfile(commit_file) : []
+            var new_content = lines + (len(existing) > 1 ? existing[1 : ] : [])
             writefile(new_content, commit_file)
 
             execute 'edit ' .. commit_file
@@ -31,7 +38,7 @@ export def GenerateMessage(): void
     catch
         ui#SpinnerStop()
         echohl ErrorMsg
-        echom '[AIExplain] ' .. v:exception
+        echom '[AICommitMessage] ' .. v:exception
         echohl None
     endtry
 enddef
@@ -54,7 +61,7 @@ export def AICallAsync(backend: string, model: string, prompt: string, Callback:
     endif
 
     if empty(cmd)
-        throw '[AIExplain] Unsupported backend: ' .. backend
+        throw '[AICommitMessage] Unsupported backend: ' .. backend
     endif
 
     return core#CallAsync(cmd, prompt, Callback)
