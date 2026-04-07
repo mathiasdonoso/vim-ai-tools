@@ -24,22 +24,24 @@ export def Code(line1: number, line2: number, args: string): void
     try
         ui#SelectionStart(bufnr('%'), line1, line2)
 
-        var system_prompt = get(g:, 'explain_prompt', '')
+        var system_prompt = get(g:, 'operator_prompt', '')
         if empty(system_prompt)
             throw '[AIOperator] system prompt is empty'
         endif
 
-        const backend = get(g:, 'explain_backend', 'claude')
+        const backend = get(g:, 'operator_backend', 'claude')
         if !executable(backend)
             throw '[AIOperator] backend executable "' .. backend .. '" not found in PATH'
         endif
 
-        const model = get(g:, 'explain_model', '')
+        const model = get(g:, 'operator_model', '')
         const prompt = BuildPrompt(line1, line2, args)
 
         current_jid = AICallAsync(backend, model, prompt, (lines) => {
+            const new_lines = StripFencedCodeBlock(lines)
+            deletebufline(bufnr('%'), line1, line2)
+            appendbufline(bufnr('%'), line1 - 1, new_lines)
             ui#SelectionStop()
-            ui#DisplayResult(lines)
         })
     catch
         ui#SelectionStop()
@@ -47,6 +49,13 @@ export def Code(line1: number, line2: number, args: string): void
         echom '[AIOperator] ' .. v:exception
         echohl None
     endtry
+enddef
+
+def StripFencedCodeBlock(lines: list<string>): list<string>
+    if len(lines) >= 2 && lines[0] =~ '^```' && lines[-1] =~ '^```'
+        return lines[1 : len(lines) - 2]
+    endif
+    return lines
 enddef
 
 export def CodeCancel(): void
