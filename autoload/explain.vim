@@ -1,5 +1,7 @@
 vim9script
 
+# TODO: Do something when no text is received
+
 var current_jid: number = 0
 
 def BuildPrompt(line1: number, line2: number): string
