@@ -79,8 +79,7 @@ export def AICallAsync(backend: string, model: string, prompt: string, Callback:
             'claude', '-p',
             '--output-format', 'text',
             '--effort', 'high',
-            '--disallowedTools', 'Bash, Write, Edit, Read',
-            # '--append-system-prompt', get(g:, 'operator_prompt'),
+            '--disallowedTools', 'Bash,Write,Edit,Read',
             '--system-prompt', get(g:, 'operator_prompt'),
         ]
 

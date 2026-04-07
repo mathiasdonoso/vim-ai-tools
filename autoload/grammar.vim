@@ -1,21 +1,18 @@
 vim9script
 
-# TODO: Do something when no text is received
-
 var current_jid: number = 0
 
 def BuildPrompt(line1: number, line2: number): string
     const lines = getline(line1, line2)
     const text = join(lines, "\n")
     if trim(text) == ''
-        throw '[AIExplain] Selection is empty'
+        throw '[AIGrammar] Selection is empty'
     endif
 
-    const filename = expand('%:t')
-    return 'Filename: ' .. filename .. "\nCode:\n" .. text
+    return "Text to improve:\n" .. text
 enddef
 
-export def ExplainCode(line1: number, line2: number): void
+export def ImproveGrammar(line1: number, line2: number): void
     if core#IsRunning(current_jid)
         return
     endif
@@ -23,50 +20,55 @@ export def ExplainCode(line1: number, line2: number): void
     try
         ui#SelectionStart(bufnr('%'), line1, line2)
 
-        var system_prompt = get(g:, 'explain_prompt', '')
+        var system_prompt = get(g:, 'grammar_prompt', '')
         if empty(system_prompt)
-            throw '[AIExplain] system prompt is empty'
+            throw '[AIGrammar] system prompt is empty'
         endif
 
-        const backend = get(g:, 'explain_backend', 'claude')
+        const backend = get(g:, 'grammar_backend', 'claude')
         if !executable(backend)
-            throw '[AIExplain] backend executable "' .. backend .. '" not found in PATH'
+            throw '[AIGrammar] backend executable "' .. backend .. '" not found in PATH'
         endif
 
-        const model = get(g:, 'explain_model', '')
+        const model = get(g:, 'grammar_model', '')
         const prompt = BuildPrompt(line1, line2)
 
+        const buf = bufnr('%')
         current_jid = AICallAsync(backend, model, prompt, (lines) => {
+            const range = ui#SelectionGetRange()
+            if empty(range)
+                ui#SelectionStop()
+                return
+            endif
+            deletebufline(buf, range[0], range[1])
+            appendbufline(buf, range[0] - 1, lines)
             ui#SelectionStop()
-            ui#DisplayResult(lines)
         })
     catch
         ui#SelectionStop()
         echohl ErrorMsg
-        echom '[AIExplain] ' .. v:exception
+        echom '[AIGrammar] ' .. v:exception
         echohl None
     endtry
 enddef
 
-export def ExplainCodeCancel(): void
+export def ImproveGrammarCancel(line1: number, line2: number)
     if core#IsRunning(current_jid)
         core#Cancel(current_jid)
     endif
     ui#SelectionStop()
-    echo '[AIExplain]: cancelled pending request'
+    echo '[AIGrammar]: cancelled pending request'
 enddef
 
-# TODO: analize the --bare option for claude and add configuration to enable or disable it.
-# Requires ANTHROPIC_API_KEY
 export def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
     var cmd: list<string> = []
     if backend == 'claude'
         cmd = [
             'claude', '-p',
             '--output-format', 'text',
-            '--effort', 'medium',
+            '--effort', 'low',
             '--disallowedTools', 'Bash,Write,Edit,Read',
-            '--append-system-prompt', get(g:, 'explain_prompt'),
+            '--system-prompt', get(g:, 'grammar_prompt'),
         ]
 
         if model != ''
@@ -76,7 +78,7 @@ export def AICallAsync(backend: string, model: string, prompt: string, Callback:
     endif
 
     if empty(cmd)
-        throw '[AIExplain] Unsupported backend: ' .. backend
+        throw '[AIGrammar] Unsupported backend: ' .. backend
     endif
 
     return core#CallAsync(cmd, prompt, Callback)
