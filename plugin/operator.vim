@@ -14,7 +14,7 @@ if !exists('g:operator_prompt')
         '- Output ONLY the final code.',
         '- If the instruction is unclear or cannot be applied, return the code unchanged.',
         '- If no changes are needed, return the code exactly as received.',
-        '- Output only raw code. No markdown fences, no language tags, no explanations, no comments about the code. Start with the first line of code, end with the last.',
+        '- Never wrap output in fenced code blocks. Output the raw code directly. No language tags, no explanations, no comments about the code.'
     ], "\n")
 endif
 

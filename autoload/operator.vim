@@ -10,7 +10,8 @@ def BuildPrompt(line1: number, line2: number, instruction: string): string
     endif
 
     const filename = expand('%:t')
-    return 'Filename: ' .. filename .. "\nInstruction: " .. instruction .. "\nCode:\n" .. text 
+
+    return $"Filename: {filename}\nInstruction: {instruction}\nCode:\n{text}"
 enddef
 
 export def Code(line1: number, line2: number, args: string): void
