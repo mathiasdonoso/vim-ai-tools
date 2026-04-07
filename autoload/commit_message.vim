@@ -34,6 +34,8 @@ export def GenerateMessage(): void
 
                 execute 'edit ' .. commit_file
                 setlocal textwidth=72
+                normal! gg
+                execute 'normal! gq' .. len(lines) .. 'G'
                 ui#SpinnerStop()
             catch
                 ui#SpinnerStop()

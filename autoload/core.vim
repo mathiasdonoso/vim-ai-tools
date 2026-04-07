@@ -9,10 +9,13 @@ export def CallAsync(cmd: list<string>, stdin_data: string, Callback: func(list<
     var jid_str = string(jid)
  
     registry[jid_str] = {
-        job:      null_job,
-        stdout:   [],
-        stderr:   [],
-        Callback: Callback,
+        job:         null_job,
+        stdout:      [],
+        stderr:      [],
+        Callback:    Callback,
+        closed:      false,
+        exited:      false,
+        exit_status: 0,
     }
  
     var job = job_start(cmd, {
@@ -29,8 +32,7 @@ export def CallAsync(cmd: list<string>, stdin_data: string, Callback: func(list<
  
     if job_status(job) == 'fail'
         remove(registry, jid_str)
-        echoerr '[async_job] Failed to start: ' .. join(cmd, ' ')
-        return -1
+        throw '[async_job] Failed to start: ' .. join(cmd, ' ')
     endif
  
     registry[jid_str].job = job
@@ -80,21 +82,49 @@ def OnClose(jid_str: string, ch: channel)
     if !has_key(registry, jid_str)
         return
     endif
- 
+    registry[jid_str].closed = true
+    MaybeFinish(jid_str)
+enddef
+
+def OnExit(jid_str: string, j: job, status: number)
+    if !has_key(registry, jid_str)
+        return
+    endif
+    registry[jid_str].exit_status = status
+    registry[jid_str].exited = true
+    MaybeFinish(jid_str)
+enddef
+
+def MaybeFinish(jid_str: string)
+    if !has_key(registry, jid_str)
+        return
+    endif
+
     var entry = registry[jid_str]
- 
+    if !entry.closed || !entry.exited
+        return
+    endif
+
+    remove(registry, jid_str)
+
     if !empty(entry.stderr)
         echohl WarningMsg
         echo '[async_job] stderr: ' .. join(entry.stderr, "\n")
         echohl None
     endif
- 
-    entry.Callback(entry.stdout)
-    remove(registry, jid_str)
-enddef
- 
-def OnExit(jid_str: string, j: job, status: number)
-    if has_key(registry, jid_str)
-        registry[jid_str].exit_status = status
+
+    if entry.exit_status != 0
+        echohl ErrorMsg
+        echom '[async_job] command exited with status ' .. entry.exit_status
+        echohl None
+        return
     endif
+
+    try
+        entry.Callback(entry.stdout)
+    catch
+        echohl ErrorMsg
+        echom '[async_job] callback error: ' .. v:exception
+        echohl None
+    endtry
 enddef

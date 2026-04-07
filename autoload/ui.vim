@@ -1,5 +1,6 @@
 vim9script
 
+var result_winid: number = -1
 var spinner_timer: number = -1
 var spinner_step: number = 0
 var spinner_msg: string = ''
@@ -16,23 +17,33 @@ const SELECTION_SIGN_NAME = 'AIProcessingSign'
 highlight default AIProcessing ctermbg=237 guibg=#3a3a3a ctermfg=250 guifg=#bcbcbc
 
 export def DisplayResult(lines: list<string>)
-    aboveleft new
+    if result_winid != -1 && win_id2win(result_winid) != 0
+        win_gotoid(result_winid)
+        setlocal modifiable
+        silent! deletebufline(bufnr('%'), 1, '$')
+    else
+        aboveleft new
+        result_winid = win_getid()
 
-    setlocal buftype=nofile
-    setlocal bufhidden=wipe
-    setlocal noswapfile
-    setlocal nobuflisted
+        setlocal buftype=nofile
+        setlocal bufhidden=wipe
+        setlocal noswapfile
+        setlocal nobuflisted
+        setlocal wrap
+        setlocal linebreak
+    endif
 
-    setlocal modifiable
+    setlocal textwidth=72
     call setline(1, lines)
+    normal! gggqG
     setlocal nomodifiable
-
-    setlocal wrap
-    setlocal linebreak
     resize 15
 enddef
 
 export def SpinnerStart(message: string)
+    if spinner_timer != -1
+        timer_stop(spinner_timer)
+    endif
     spinner_msg = message
     spinner_step = 0
     SpinnerTick(0)
@@ -54,6 +65,10 @@ def SpinnerTick(timer_id: number)
 enddef
 
 export def SelectionStart(bufnr: number, line1: number, line2: number)
+    if selection_timer != -1
+        timer_stop(selection_timer)
+        selection_timer = -1
+    endif
     selection_bufnr = bufnr
     selection_step = 0
     selection_winid = win_getid()
