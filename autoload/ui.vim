@@ -100,6 +100,18 @@ export def SelectionStop()
     selection_winid = -1
 enddef
 
+export def SelectionGetRange(): list<number>
+    if selection_bufnr == -1
+        return []
+    endif
+    const placed = sign_getplaced(selection_bufnr, {group: SELECTION_SIGN_GROUP})
+    if empty(placed) || empty(placed[0].signs)
+        return []
+    endif
+    const lnums = mapnew(placed[0].signs, (_, s) => s.lnum)
+    return [min(lnums), max(lnums)]
+enddef
+
 def SelectionTick(timer_id: number)
     if selection_bufnr == -1
         return

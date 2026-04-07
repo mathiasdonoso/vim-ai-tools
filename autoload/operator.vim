@@ -36,11 +36,17 @@ export def Code(line1: number, line2: number, args: string): void
 
         const model = get(g:, 'operator_model', '')
         const prompt = BuildPrompt(line1, line2, args)
+        const buf = bufnr('%')
 
         current_jid = AICallAsync(backend, model, prompt, (lines) => {
             const new_lines = StripFencedCodeBlock(lines)
-            deletebufline(bufnr('%'), line1, line2)
-            appendbufline(bufnr('%'), line1 - 1, new_lines)
+            const range = ui#SelectionGetRange()
+            if empty(range)
+                ui#SelectionStop()
+                return
+            endif
+            deletebufline(buf, range[0], range[1])
+            appendbufline(buf, range[0] - 1, new_lines)
             ui#SelectionStop()
         })
     catch
@@ -74,7 +80,8 @@ export def AICallAsync(backend: string, model: string, prompt: string, Callback:
             '--output-format', 'text',
             '--effort', 'high',
             '--disallowedTools', 'Bash, Write, Edit, Read',
-            '--append-system-prompt', get(g:, 'operator_prompt'),
+            # '--append-system-prompt', get(g:, 'operator_prompt'),
+            '--system-prompt', get(g:, 'operator_prompt'),
         ]
 
         if model != ''
