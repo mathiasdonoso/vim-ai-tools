@@ -38,9 +38,12 @@ export def Code(line1: number, line2: number, args: string): void
         const prompt = BuildPrompt(line1, line2, args)
         const buf = bufnr('%')
 
-        current_jid = ai#AICallAsync(backend, model, prompt,
-            ai#Config(get(g:, 'operator_prompt'), '--system-prompt', 'Bash,Write,Edit,Read', 'high'),
-            (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt, {
+            effort: 'high',
+            disallowed_tools: 'Bash,Write,Edit,Read',
+            system_prompt: get(g:, 'operator_prompt'),
+            system_prompt_flag: '--system-prompt',
+        }, (lines) => {
             try
                 const new_lines = StripFencedCodeBlock(lines)
                 const range = ui#SelectionGetRange()

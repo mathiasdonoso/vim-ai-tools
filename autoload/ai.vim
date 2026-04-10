@@ -1,24 +1,5 @@
 vim9script
 
-# Build a config dict for AICallAsync.
-#   system_prompt       - system prompt string (required)
-#   system_prompt_flag  - '--system-prompt' or '--append-system-prompt' (default)
-#   disallowed_tools    - comma-separated tool names (default: 'Bash,Write,Edit,Read')
-#   effort              - 'low', 'medium', 'high', or '' to omit (default: '')
-export def Config(
-    system_prompt: string,
-    system_prompt_flag: string = '--append-system-prompt',
-    disallowed_tools: string = 'Bash,Write,Edit,Read',
-    effort: string = ''
-): dict<string>
-    return {
-        system_prompt: system_prompt,
-        system_prompt_flag: system_prompt_flag,
-        disallowed_tools: disallowed_tools,
-        effort: effort,
-    }
-enddef
-
 export def AICallAsync(backend: string, model: string, prompt: string, config: dict<string>, Callback: func(list<string>)): number
     var cmd: list<string> = []
     if backend == 'claude'

@@ -37,9 +37,11 @@ export def Ask(args: string): void
         const prompt = BuildPrompt(args)
         const buf = bufnr('%')
 
-        current_jid = ai#AICallAsync(backend, model, prompt,
-            ai#Config(get(g:, 'ask_prompt'), '--append-system-prompt', 'Bash,Write,Edit'),
-            (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt, {
+            disallowed_tools: 'Bash,Write,Edit',
+            system_prompt: get(g:, 'ask_prompt'),
+            system_prompt_flag: '--append-system-prompt',
+        }, (lines) => {
             try
                 ui#SpinnerStop()
                 ui#DisplayResult(lines)

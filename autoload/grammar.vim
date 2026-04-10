@@ -34,9 +34,12 @@ export def ImproveGrammar(line1: number, line2: number): void
         const prompt = BuildPrompt(line1, line2)
 
         const buf = bufnr('%')
-        current_jid = ai#AICallAsync(backend, model, prompt,
-            ai#Config(get(g:, 'grammar_prompt'), '--system-prompt', 'Bash,Write,Edit,Read', 'low'),
-            (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt, {
+            effort: 'low',
+            disallowed_tools: 'Bash,Write,Edit,Read',
+            system_prompt: get(g:, 'grammar_prompt'),
+            system_prompt_flag: '--system-prompt',
+        }, (lines) => {
             try
                 const range = ui#SelectionGetRange()
                 if empty(range)

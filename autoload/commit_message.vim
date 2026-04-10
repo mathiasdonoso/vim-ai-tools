@@ -29,9 +29,12 @@ export def GenerateMessage(): void
 
         const model = get(g:, 'commit_message_model', '')
 
-        current_jid = ai#AICallAsync(backend, model, prompt,
-            ai#Config(get(g:, 'commit_message_prompt'), '--append-system-prompt', 'Bash,Write,Edit,Read', 'low'),
-            (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt, {
+            effort: 'low',
+            disallowed_tools: 'Bash,Write,Edit,Read',
+            system_prompt: get(g:, 'commit_message_prompt'),
+            system_prompt_flag: '--append-system-prompt',
+        }, (lines) => {
             try
                 var commit_file = git_dir .. '/COMMIT_EDITMSG'
 

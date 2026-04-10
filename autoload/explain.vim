@@ -35,9 +35,12 @@ export def ExplainCode(line1: number, line2: number): void
         const model = get(g:, 'explain_model', '')
         const prompt = BuildPrompt(line1, line2)
 
-        current_jid = ai#AICallAsync(backend, model, prompt,
-            ai#Config(get(g:, 'explain_prompt'), '--append-system-prompt', 'Bash,Write,Edit,Read', 'medium'),
-            (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt, {
+            effort: 'medium',
+            disallowed_tools: 'Bash,Write,Edit,Read',
+            system_prompt: get(g:, 'explain_prompt'),
+            system_prompt_flag: '--append-system-prompt',
+        }, (lines) => {
             try
                 ui#SelectionStop()
                 ui#DisplayResult(lines)
