@@ -10,6 +10,7 @@ These are not designed for a complete AI-integrated working experience — just 
 - **AIOperator**      - generates or transforms code from a natural language prompt using an LLM
 - **AICommitMessage** — generates commit messages following the conventional commits format
 - **AIGrammar**       — improves grammar, clarity, and style of selected text using an LLM (supersedes [vim-english](https://github.com/mathiasdonoso/vim-english))
+- **AIAsk**           — queries the codebase with a natural language question using an LLM and displays the result in a new buffer
 
 ## Status
 
