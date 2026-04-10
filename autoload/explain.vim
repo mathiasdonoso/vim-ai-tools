@@ -35,7 +35,12 @@ export def ExplainCode(line1: number, line2: number): void
         const model = get(g:, 'explain_model', '')
         const prompt = BuildPrompt(line1, line2)
 
-        current_jid = AICallAsync(backend, model, prompt, (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt, {
+            effort: 'medium',
+            disallowed_tools: 'Bash,Write,Edit,Read',
+            system_prompt: get(g:, 'explain_prompt'),
+            system_prompt_flag: '--append-system-prompt',
+        }, (lines) => {
             try
                 ui#SelectionStop()
                 ui#DisplayResult(lines)
@@ -62,28 +67,3 @@ export def ExplainCodeCancel(): void
     echo '[AIExplain]: cancelled pending request'
 enddef
 
-# TODO: analize the --bare option for claude and add configuration to enable or disable it.
-# Requires ANTHROPIC_API_KEY
-export def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
-    var cmd: list<string> = []
-    if backend == 'claude'
-        cmd = [
-            'claude', '-p',
-            '--output-format', 'text',
-            '--effort', 'medium',
-            '--disallowedTools', 'Bash,Write,Edit,Read',
-            '--append-system-prompt', get(g:, 'explain_prompt'),
-        ]
-
-        if model != ''
-            cmd->add('--model')
-            cmd->add(model)
-        endif
-    endif
-
-    if empty(cmd)
-        throw '[AIExplain] Unsupported backend: ' .. backend
-    endif
-
-    return core#CallAsync(cmd, prompt, Callback)
-enddef

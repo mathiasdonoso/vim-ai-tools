@@ -37,7 +37,11 @@ export def Ask(args: string): void
         const prompt = BuildPrompt(args)
         const buf = bufnr('%')
 
-        current_jid = AICallAsync(backend, model, prompt, (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt, {
+            disallowed_tools: 'Bash,Write,Edit',
+            system_prompt: get(g:, 'ask_prompt'),
+            system_prompt_flag: '--append-system-prompt',
+        }, (lines) => {
             try
                 ui#SpinnerStop()
                 ui#DisplayResult(lines)
@@ -62,27 +66,4 @@ export def AskCancel(): void
     endif
     ui#SpinnerStop()
     echo '[AIAsk]: cancelled pending request'
-enddef
-
-def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
-    var cmd: list<string> = []
-    if backend == 'claude'
-        cmd = [
-            'claude', '-p',
-            '--output-format', 'text',
-            '--disallowedTools', 'Bash,Write,Edit',
-            '--append-system-prompt', get(g:, 'ask_prompt'),
-        ]
-
-        if model != ''
-            cmd->add('--model')
-            cmd->add(model)
-        endif
-    endif
-
-    if empty(cmd)
-        throw '[AIAsk] Unsupported backend: ' .. backend
-    endif
-
-    return core#CallAsync(cmd, prompt, Callback)
 enddef

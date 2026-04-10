@@ -29,7 +29,12 @@ export def GenerateMessage(): void
 
         const model = get(g:, 'commit_message_model', '')
 
-        current_jid = AICallAsync(backend, model, prompt, (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt, {
+            effort: 'low',
+            disallowed_tools: 'Bash,Write,Edit,Read',
+            system_prompt: get(g:, 'commit_message_prompt'),
+            system_prompt_flag: '--append-system-prompt',
+        }, (lines) => {
             try
                 var commit_file = git_dir .. '/COMMIT_EDITMSG'
 
@@ -65,26 +70,3 @@ export def GenerateMessageCancel(): void
     echo '[AICommitMessage]: cancelled pending request'
 enddef
 
-export def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
-    var cmd: list<string> = []
-    if backend == 'claude'
-        cmd = [
-            'claude', '-p',
-            '--output-format', 'text',
-            '--effort', 'low',
-            '--disallowedTools', 'Bash,Write,Edit,Read',
-            '--append-system-prompt', get(g:, 'commit_message_prompt'),
-        ]
-
-        if model != ''
-            cmd->add('--model')
-            cmd->add(model)
-        endif
-    endif
-
-    if empty(cmd)
-        throw '[AICommitMessage] Unsupported backend: ' .. backend
-    endif
-
-    return core#CallAsync(cmd, prompt, Callback)
-enddef
