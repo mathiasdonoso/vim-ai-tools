@@ -34,7 +34,9 @@ export def ImproveGrammar(line1: number, line2: number): void
         const prompt = BuildPrompt(line1, line2)
 
         const buf = bufnr('%')
-        current_jid = AICallAsync(backend, model, prompt, (lines) => {
+        current_jid = ai#AICallAsync(backend, model, prompt,
+            ai#Config(get(g:, 'grammar_prompt'), '--system-prompt', 'Bash,Write,Edit,Read', 'low'),
+            (lines) => {
             try
                 const range = ui#SelectionGetRange()
                 if empty(range)
@@ -67,26 +69,3 @@ export def ImproveGrammarCancel(line1: number, line2: number)
     echo '[AIGrammar]: cancelled pending request'
 enddef
 
-export def AICallAsync(backend: string, model: string, prompt: string, Callback: func(list<string>)): number
-    var cmd: list<string> = []
-    if backend == 'claude'
-        cmd = [
-            'claude', '-p',
-            '--output-format', 'text',
-            '--effort', 'low',
-            '--disallowedTools', 'Bash,Write,Edit,Read',
-            '--system-prompt', get(g:, 'grammar_prompt'),
-        ]
-
-        if model != ''
-            cmd->add('--model')
-            cmd->add(model)
-        endif
-    endif
-
-    if empty(cmd)
-        throw '[AIGrammar] Unsupported backend: ' .. backend
-    endif
-
-    return core#CallAsync(cmd, prompt, Callback)
-enddef
